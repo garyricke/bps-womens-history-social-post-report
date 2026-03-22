@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPS101 Social Media Controversy — Deep Dive Report</title>
+<style>
+  :root {
+    --blue: #1a3a5c;
+    --gold: #c8972b;
+    --red: #b03030;
+    --green: #2a6e3f;
+    --light: #f4f6f9;
+    --white: #ffffff;
+    --gray: #6b7280;
+    --border: #dde3ea;
+    --shadow: 0 4px 24px rgba(0,0,0,0.10);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.18);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: #1a1a2e; line-height: 1.7; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1a3a5c 60%, #2a5080 100%);
+    color: white; padding: 80px 20px 60px; text-align: center; position: relative; overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    opacity: 1;
+  }
+  .header-badge {
+    display: inline-block; background: var(--gold); color: white;
+    padding: 4px 16px; border-radius: 20px; font-size: 0.78rem; letter-spacing: 2px;
+    text-transform: uppercase; font-family: sans-serif; margin-bottom: 20px;
+  }
+  header h1 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: bold; line-height: 1.2; margin-bottom: 16px; position: relative; }
+  header p.subtitle { font-size: 1.1rem; opacity: 0.85; max-width: 700px; margin: 0 auto 28px; font-family: sans-serif; }
+  .header-meta { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; font-family: sans-serif; font-size: 0.85rem; opacity: 0.75; }
+  .header-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* NAV */
+  nav {
+    background: var(--blue); color: white; position: sticky; top: 0; z-index: 100;
+    display: flex; justify-content: center; gap: 0; overflow-x: auto; box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  nav a {
+    color: rgba(255,255,255,0.8); text-decoration: none; padding: 14px 18px;
+    font-family: sans-serif; font-size: 0.82rem; letter-spacing: 0.5px; white-space: nowrap;
+    border-bottom: 3px solid transparent; transition: all 0.2s;
+  }
+  nav a:hover { color: white; border-bottom-color: var(--gold); }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 60px 0; }
+  section:nth-child(even) { background: white; }
+
+  /* SECTION HEADERS */
+  .section-label {
+    font-family: sans-serif; font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 8px; font-weight: 700;
+  }
+  h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); color: var(--blue); margin-bottom: 12px; }
+  .section-intro { font-size: 1.05rem; color: var(--gray); max-width: 760px; margin-bottom: 40px; }
+
+  /* STAT CARDS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 40px 0; }
+  .stat-card {
+    background: white; border-radius: 12px; padding: 28px 20px; text-align: center;
+    box-shadow: var(--shadow); border-top: 4px solid var(--blue); transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-4px); }
+  .stat-card .number { font-size: 2.8rem; font-weight: bold; color: var(--blue); line-height: 1; margin-bottom: 8px; }
+  .stat-card .number.red { color: var(--red); }
+  .stat-card .number.green { color: var(--green); }
+  .stat-card .number.gold { color: var(--gold); }
+  .stat-card .label { font-family: sans-serif; font-size: 0.85rem; color: var(--gray); line-height: 1.4; }
+  .stat-card .source { font-family: sans-serif; font-size: 0.7rem; color: #aaa; margin-top: 8px; }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding: 20px 0; }
+  .timeline::before {
+    content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(to bottom, var(--blue), var(--gold)); transform: translateX(-50%);
+  }
+  .timeline-item { display: flex; justify-content: flex-end; padding-right: calc(50% + 30px); margin-bottom: 30px; position: relative; }
+  .timeline-item:nth-child(even) { justify-content: flex-start; padding-right: 0; padding-left: calc(50% + 30px); }
+  .timeline-dot {
+    position: absolute; left: 50%; top: 16px; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--blue); border: 3px solid white; box-shadow: 0 0 0 3px var(--blue);
+    transform: translateX(-50%);
+  }
+  .timeline-item:nth-child(even) .timeline-dot { background: var(--gold); box-shadow: 0 0 0 3px var(--gold); }
+  .timeline-card {
+    background: white; border-radius: 10px; padding: 18px 22px; box-shadow: var(--shadow);
+    max-width: 380px; width: 100%;
+  }
+  .timeline-date { font-family: sans-serif; font-size: 0.75rem; color: var(--gold); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .timeline-card h4 { font-size: 1rem; color: var(--blue); margin: 4px 0 6px; }
+  .timeline-card p { font-size: 0.9rem; color: var(--gray); }
+
+  /* QUOTE BLOCKS */
+  .quote-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .quote-card {
+    background: var(--light); border-radius: 12px; padding: 28px; position: relative;
+    border-left: 5px solid var(--blue); box-shadow: var(--shadow);
+  }
+  .quote-card.support { border-left-color: var(--green); }
+  .quote-card.oppose { border-left-color: var(--red); }
+  .quote-card.neutral { border-left-color: var(--gold); }
+  .quote-card::before { content: '\201C'; font-size: 4rem; color: var(--blue); opacity: 0.15; position: absolute; top: 10px; left: 16px; line-height: 1; font-family: Georgia; }
+  .quote-card.support::before { color: var(--green); }
+  .quote-card.oppose::before { color: var(--red); }
+  .quote-card blockquote { font-size: 0.95rem; font-style: italic; margin-bottom: 16px; padding-top: 16px; color: #333; }
+  .quote-card .speaker { font-family: sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--blue); }
+  .quote-card .speaker-role { font-family: sans-serif; font-size: 0.78rem; color: var(--gray); }
+
+  /* ACCORDION */
+  .accordion { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+  .accordion-header {
+    background: white; padding: 18px 22px; cursor: pointer; display: flex; justify-content: space-between;
+    align-items: center; font-family: sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--blue);
+    transition: background 0.2s; user-select: none;
+  }
+  .accordion-header:hover { background: #f0f4f9; }
+  .accordion-header .tag {
+    font-size: 0.72rem; padding: 3px 10px; border-radius: 12px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .tag-support { background: #dcfce7; color: #166534; }
+  .tag-oppose { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #fef9c3; color: #854d0e; }
+  .tag-national { background: #ede9fe; color: #5b21b6; }
+  .tag-local { background: #dbeafe; color: #1e40af; }
+  .accordion-chevron { transition: transform 0.3s; font-size: 1.1rem; color: var(--gray); }
+  .accordion.open .accordion-chevron { transform: rotate(180deg); }
+  .accordion-body { display: none; padding: 20px 22px; background: #fafbfd; border-top: 1px solid var(--border); font-size: 0.92rem; line-height: 1.75; color: #444; }
+  .accordion.open .accordion-body { display: block; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.65); z-index: 1000; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: white; border-radius: 16px; max-width: 720px; width: 100%; max-height: 85vh;
+    overflow-y: auto; box-shadow: var(--shadow-lg); animation: modalIn 0.25s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .modal-header {
+    background: var(--blue); color: white; padding: 24px 28px; border-radius: 16px 16px 0 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .modal-header h3 { font-size: 1.3rem; line-height: 1.3; }
+  .modal-close { background: none; border: none; color: white; font-size: 1.6rem; cursor: pointer; opacity: 0.8; padding: 0 0 0 16px; }
+  .modal-close:hover { opacity: 1; }
+  .modal-body { padding: 28px; }
+  .modal-body h4 { color: var(--blue); margin: 20px 0 8px; font-size: 1rem; }
+  .modal-body p, .modal-body li { font-size: 0.93rem; color: #444; margin-bottom: 10px; }
+  .modal-body ul { padding-left: 20px; }
+  .modal-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  .modal-table th { background: var(--blue); color: white; padding: 10px 14px; text-align: left; font-family: sans-serif; font-size: 0.82rem; }
+  .modal-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+  .modal-table tr:nth-child(even) td { background: var(--light); }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--blue); color: white;
+    border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: sans-serif;
+    font-size: 0.85rem; font-weight: 600; transition: all 0.2s; text-decoration: none;
+  }
+  .btn:hover { background: #24537a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,58,92,0.3); }
+  .btn-gold { background: var(--gold); }
+  .btn-gold:hover { background: #a87b22; box-shadow: 0 4px 12px rgba(200,151,43,0.3); }
+  .btn-sm { padding: 7px 14px; font-size: 0.78rem; }
+
+  /* MEDIA CARDS */
+  .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .media-card {
+    background: white; border-radius: 12px; padding: 24px; box-shadow: var(--shadow);
+    border-top: 4px solid var(--blue); cursor: pointer; transition: all 0.2s;
+  }
+  .media-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .media-card.conservative { border-top-color: var(--red); }
+  .media-card.local { border-top-color: var(--green); }
+  .media-card.national { border-top-color: #7c3aed; }
+  .media-card .outlet-type { font-family: sans-serif; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+  .conservative .outlet-type { color: var(--red); }
+  .local .outlet-type { color: var(--green); }
+  .national .outlet-type { color: #7c3aed; }
+  .media-card h4 { font-size: 1rem; color: var(--blue); margin-bottom: 8px; }
+  .media-card p { font-size: 0.85rem; color: var(--gray); }
+  .media-card .cta { margin-top: 14px; }
+
+  /* TWO COLUMN */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* HIGHLIGHT BOX */
+  .highlight-box {
+    background: linear-gradient(135deg, var(--blue), #2a5080);
+    color: white; border-radius: 16px; padding: 36px 40px; margin: 40px 0;
+  }
+  .highlight-box h3 { font-size: 1.4rem; margin-bottom: 12px; }
+  .highlight-box p { opacity: 0.9; font-size: 0.95rem; }
+  .highlight-box .big-quote { font-size: 1.4rem; font-style: italic; border-left: 4px solid var(--gold); padding-left: 20px; margin: 20px 0; opacity: 0.95; }
+
+  /* ALERT BOX */
+  .alert-box {
+    border-radius: 10px; padding: 18px 22px; margin: 20px 0; display: flex; gap: 14px; align-items: flex-start;
+  }
+  .alert-box.warning { background: #fff7ed; border: 1px solid #fed7aa; }
+  .alert-box.info { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .alert-box.success { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .alert-box.danger { background: #fef2f2; border: 1px solid #fecaca; }
+  .alert-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+  .alert-box p { font-size: 0.92rem; color: #444; margin: 0; }
+
+  /* INFRASTRUCTURE */
+  .infra-table { width: 100%; border-collapse: collapse; box-shadow: var(--shadow); border-radius: 10px; overflow: hidden; }
+  .infra-table th { background: var(--blue); color: white; padding: 14px 18px; text-align: left; font-family: sans-serif; font-size: 0.85rem; }
+  .infra-table td { padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 0.9rem; background: white; }
+  .infra-table tr:last-child td { border-bottom: none; }
+  .infra-table .cost { font-weight: 700; color: var(--red); }
+
+  /* SPEAKER GRID */
+  .speaker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+  .speaker-card {
+    background: white; border-radius: 10px; padding: 18px 20px; box-shadow: var(--shadow);
+    border-left: 4px solid var(--green); transition: transform 0.2s; cursor: pointer;
+  }
+  .speaker-card.oppose { border-left-color: var(--red); }
+  .speaker-card:hover { transform: translateY(-2px); }
+  .speaker-card h5 { font-size: 0.95rem; color: var(--blue); margin-bottom: 4px; }
+  .speaker-card .role { font-family: sans-serif; font-size: 0.78rem; color: var(--gray); margin-bottom: 10px; }
+  .speaker-card .preview { font-size: 0.85rem; color: #555; font-style: italic; }
+  .speaker-badge { display: inline-block; font-family: sans-serif; font-size: 0.7rem; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px; }
+  .badge-support { background: #dcfce7; color: #166534; }
+  .badge-oppose { background: #fee2e2; color: #991b1b; }
+
+  /* PROGRESS BAR */
+  .progress-bar { background: #e5e7eb; border-radius: 8px; height: 12px; overflow: hidden; margin: 8px 0; }
+  .progress-fill { height: 100%; border-radius: 8px; transition: width 1s ease; }
+
+  /* FOOTER */
+  footer { background: #0d1b2a; color: rgba(255,255,255,0.7); padding: 40px 20px; text-align: center; font-family: sans-serif; font-size: 0.85rem; }
+  footer strong { color: white; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .timeline::before { left: 20px; }
+    .timeline-item { padding-right: 0; padding-left: 50px; justify-content: flex-start; }
+    .timeline-item:nth-child(even) { padding-left: 50px; }
+    .timeline-dot { left: 20px; }
+    .timeline-card { max-width: 100%; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .header-meta { flex-direction: column; gap: 8px; }
+  }
+
+  /* PILL TAGS */
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+  .pill { background: var(--light); border: 1px solid var(--border); border-radius: 20px; padding: 4px 14px; font-family: sans-serif; font-size: 0.78rem; color: var(--gray); }
+
+  .divider { height: 1px; background: var(--border); margin: 30px 0; }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="gate" style="
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#0d1b2a 0%,#1a3a5c 60%,#2a5080 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Georgia',serif;
+">
+  <div style="
+    background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);
+    border-radius:20px;padding:52px 48px;max-width:420px;width:90%;
+    text-align:center;backdrop-filter:blur(12px);box-shadow:0 24px 80px rgba(0,0,0,0.5);
+  ">
+    <div style="font-size:2.6rem;margin-bottom:18px;">🔒</div>
+    <h2 style="color:#fff;font-size:1.5rem;margin-bottom:8px;letter-spacing:-0.5px;">Restricted Report</h2>
+    <p style="color:rgba(255,255,255,0.6);font-family:sans-serif;font-size:0.88rem;margin-bottom:32px;line-height:1.6;">
+      BPS101 Social Media Controversy — Deep Dive.<br>Enter the password to continue.
+    </p>
+    <div style="position:relative;margin-bottom:16px;">
+      <input id="gate-input" type="password" placeholder="Enter password"
+        style="
+          width:100%;padding:14px 48px 14px 18px;border-radius:10px;
+          border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);
+          color:#fff;font-size:1rem;font-family:sans-serif;outline:none;
+          transition:border 0.2s;box-sizing:border-box;
+        "
+        oninput="document.getElementById('gate-err').style.opacity='0'"
+        onkeydown="if(event.key==='Enter')checkGate()"
+      />
+      <button onclick="toggleVis()" title="Show/hide" style="
+        position:absolute;right:14px;top:50%;transform:translateY(-50%);
+        background:none;border:none;cursor:pointer;font-size:1.1rem;color:rgba(255,255,255,0.5);
+      " id="vis-btn">👁</button>
+    </div>
+    <div id="gate-err" style="
+      color:#f87171;font-family:sans-serif;font-size:0.82rem;
+      margin-bottom:14px;opacity:0;transition:opacity 0.2s;min-height:18px;
+    ">Incorrect password. Please try again.</div>
+    <button onclick="checkGate()" style="
+      width:100%;padding:14px;border-radius:10px;border:none;cursor:pointer;
+      background:linear-gradient(135deg,#c8972b,#e8b84b);
+      color:#0d1b2a;font-family:sans-serif;font-size:1rem;font-weight:700;
+      letter-spacing:0.5px;transition:opacity 0.2s;
+    " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+      Unlock Report
+    </button>
+  </div>
+</div>
+<script>
+  const HASH = '0b80a6571bb72078888f4e82e66dcc50c0da68b3f49e6c3ad3741c5e27fb65f8';
+  async function sha256(msg) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  async function checkGate() {
+    const val = document.getElementById('gate-input').value.trim();
+    if (!val) return;
+    const hash = await sha256(val);
+    if (hash === HASH) {
+      sessionStorage.setItem('bps_auth','1');
+      const gate = document.getElementById('gate');
+      gate.style.transition = 'opacity 0.4s';
+      gate.style.opacity = '0';
+      setTimeout(() => gate.remove(), 400);
+    } else {
+      const err = document.getElementById('gate-err');
+      err.style.opacity = '1';
+      const inp = document.getElementById('gate-input');
+      inp.style.border = '2px solid #f87171';
+      inp.value = '';
+      setTimeout(() => inp.style.border = '2px solid rgba(255,255,255,0.2)', 1200);
+    }
+  }
+  function toggleVis() {
+    const inp = document.getElementById('gate-input');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+  if (sessionStorage.getItem('bps_auth') === '1') {
+    document.getElementById('gate').style.display = 'none';
+  }
+</script>
+
+<!-- HEADER -->
+<header>
+  <div class="header-badge">Investigative Report · March 2026</div>
+  <h1>When a School Post Went National:<br>The BPS101 Women's History Month Controversy</h1>
+  <p class="subtitle">A comprehensive deep-dive into how one social media post about Rep. Sarah McBride ignited a national culture-war firestorm in Batavia, Illinois — and what happened next.</p>
+  <div class="header-meta">
+    <span>📍 Batavia, Illinois (Pop. 27,000)</span>
+    <span>📅 March 12–22, 2026</span>
+    <span>🏫 Batavia Public School District 101</span>
+    <span>🔥 National Reach</span>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <a href="#overview">Overview</a>
+  <a href="#timeline">Timeline</a>
+  <a href="#stats">Key Statistics</a>
+  <a href="#board-meeting">Board Meeting</a>
+  <a href="#voices">Community Voices</a>
+  <a href="#media">Media Coverage</a>
+  <a href="#policy">Policy Changes</a>
+  <a href="#infrastructure">Infrastructure Context</a>
+  <a href="#facebook">Facebook Comments</a>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="container">
+    <div class="section-label">Executive Overview</div>
+    <h2>The Post That Sparked a National Debate</h2>
+    <p class="section-intro">On the morning of Thursday, March 12, 2026, the Batavia School District 101 (BPS101) communications department posted a Women's History Month tribute to U.S. Representative Sarah McBride on its social media channels. Within hours, the post was absorbed into a national ideological apparatus — triggering demands for firings, board resignations, and an institutional communication overhaul.</p>
+
+    <div class="two-col">
+      <div>
+        <p>The post featured a biographical sketch of Rep. McBride — noting her birth in Wilmington, Delaware, her tenure as national press secretary for the Human Rights Campaign, her work passing non-discrimination laws in the Delaware state legislature, and her historic election as the <strong>first openly transgender person elected to the United States Congress</strong> on November 5, 2024.</p>
+        <br>
+        <p>BPS101's stated mission for its social media presence was to "educate parents" and celebrate "news and celebrations" of the district community. The district's own Communications Guidelines call for posts 2–3 times per week on Facebook and characterize the district's digital platforms as tools for "sharing important announcements, upcoming events, and news stories."</p>
+        <br>
+        <div class="alert-box info">
+          <div class="alert-icon">ℹ️</div>
+          <p><strong>What was in the post?</strong> The post described McBride as a "groundbreaking" figure whose work was "instrumental" in passing non-discrimination laws. It included an image and biographical detail about her career in advocacy and elected office. Critics called it "glowing" and "jubilant," with what was described as "a childishly enthusiastic exclamation point."</p>
+        </div>
+        <br>
+        <button class="btn btn-gold" onclick="openModal('modal-mcbride')">Deep Dive: Who Is Sarah McBride? ↗</button>
+      </div>
+      <div>
+        <div class="highlight-box">
+          <h3>The Core Controversy</h3>
+          <div class="big-quote">"In a single post you brought disgrace and embarrassment to our entire school district."</div>
+          <p>— Richard Den, the sole critic at the March 16 board meeting</p>
+          <br>
+          <div class="big-quote">"Trans women are women. And all children belong in BPS101."</div>
+          <p>— Board Member Katy Swiecki, March 16, 2026</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section id="timeline" style="background: white;">
+  <div class="container">
+    <div class="section-label">Chronology of Events</div>
+    <h2>How It Unfolded</h2>
+    <p class="section-intro">From the moment the post went live to the board's formal response, the controversy moved with remarkable speed across platforms and geographic boundaries.</p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">Thursday, March 12, 2026 — Morning</div>
+          <h4>The Post Goes Live</h4>
+          <p>BPS101 Communications Department publishes a Women's History Month tribute to Rep. Sarah McBride on district social media channels.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">March 12, 2026 — Hours Later</div>
+          <h4>Jeanne Ives Amplifies on X</h4>
+          <p>Former Illinois state lawmaker Jeanne Ives posts on X (formerly Twitter), calling the tribute an <em>"embarrassing and Woke tribute."</em> Conservative media mobilization begins.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">March 12, 2026 — Same Day</div>
+          <h4>Breakthrough Ideas Coverage</h4>
+          <p>Conservative outlet <em>Breakthrough Ideas</em> publishes a lengthy analysis labeling BPS101's post as an endorsement of "trans superstition" that "denies the meaning of physical embodiment," potentially jeopardizing federal funding under Trump's Executive Order.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">March 12–15, 2026</div>
+          <h4>National Amplification</h4>
+          <p>Conservative outlets including the <em>Daily Caller</em> and national platforms associated with Tucker Carlson amplify the story. Screenshots circulate on pages across the country before deletion — making retraction effectively impossible.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">March 12–15, 2026</div>
+          <h4>Post Deleted</h4>
+          <p>BPS101 removes the post following legal consultation. Communications Director Holly Deitchman cites that the post "no longer served its educational purpose" once it became a magnet for vitriol. A new policy is announced: all comments disabled on future social media posts.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">March 15, 2026</div>
+          <h4>IWD Website Controversy (Global Context)</div>
+          <p>The Guardian reports on parallel controversy: the website internationalwomensday.com — mistakenly used by major UK brands — is condemned for "exploiting" Women's Day as "meaningless marketing." The UN distances itself.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">Sunday, March 16, 2026 — Evening</div>
+          <h4>Board of Education Meeting</h4>
+          <p>13 community members address the board. 12 of 13 speakers support the post. The board announces new communication initiatives. Board Member Katy Swiecki delivers her statement: <em>"Trans women are women. And all children belong in BPS101."</em></p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">Friday, March 20, 2026</div>
+          <h4>District Dispatch Mailed</h4>
+          <p>The first issue of BPS101's new print newsletter, "The District Dispatch," is mailed to all residences in the community — a deliberate pivot from volatile social media to controlled, one-way print communication.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">March 22, 2026</div>
+          <h4>Shaw Local Coverage Published</h4>
+          <p>The <em>Kane County Chronicle / Shaw Local</em> publishes a comprehensive account documenting the "disconnect" between hateful online comments and the overwhelmingly supportive in-person community at the board meeting.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KEY STATISTICS -->
+<section id="stats">
+  <div class="container">
+    <div class="section-label">Key Statistics & Data</div>
+    <h2>The Numbers Behind the Story</h2>
+    <p class="section-intro">From election results to suicide prevention data, the real statistics paint a more nuanced picture than the social media firestorm suggested.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="number green">12/13</div>
+        <div class="label">Public speakers at the board meeting who supported the post</div>
+        <div class="source">March 16, 2026 Board Meeting</div>
+      </div>
+      <div class="stat-card">
+        <div class="number blue">58%</div>
+        <div class="label">Of votes Sarah McBride won in the November 2024 general election</div>
+        <div class="source">Ryan Hatfield, Board Meeting Testimony</div>
+      </div>
+      <div class="stat-card">
+        <div class="number green">40%</div>
+        <div class="label">Reduction in suicide risk for trans youth in affirming environments vs. unsupported peers</div>
+        <div class="source">NIH & Trevor Project (cited at meeting)</div>
+      </div>
+      <div class="stat-card">
+        <div class="number gold">9–10%</div>
+        <div class="label">Of teenagers who identify as LGBTQ — meaning students in every classroom, team, and club</div>
+        <div class="source">Research cited by Heather Delmaso</div>
+      </div>
+      <div class="stat-card">
+        <div class="number red">$11.3M</div>
+        <div class="label">In HLS-eligible near-term (5–10 yr) infrastructure repair projects facing BPS101</div>
+        <div class="source">March 16, 2026 Board Meeting</div>
+      </div>
+      <div class="stat-card">
+        <div class="number red">$6.3M</div>
+        <div class="label">In HLS Phase 2 midterm (10–15 yr) infrastructure projects, including aging ventilation systems</div>
+        <div class="source">March 16, 2026 Board Meeting</div>
+      </div>
+      <div class="stat-card">
+        <div class="number blue">27,000</div>
+        <div class="label">Population of Batavia, IL — the city the opposition argued couldn't "find one female" to celebrate</div>
+        <div class="source">Richard Den, Board Meeting Testimony</div>
+      </div>
+      <div class="stat-card">
+        <div class="number gold">70 yrs</div>
+        <div class="label">Age of galvanized pipes at JB Nelson School — actively failing while the culture war raged</div>
+        <div class="source">March 16, 2026 Board Meeting</div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="openModal('modal-stats-deep')">Deep Dive: Full Statistical Context ↗</button>
+
+    <div class="divider"></div>
+
+    <h3 style="color: var(--blue); margin-bottom: 20px;">Support vs. Opposition at the Board Meeting</h3>
+    <div style="max-width: 500px;">
+      <div style="font-family: sans-serif; font-size: 0.88rem; margin-bottom: 8px; display:flex; justify-content: space-between;">
+        <span><strong>12 Supporters</strong></span><span style="color: var(--green);">92.3%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width: 92.3%; background: var(--green);"></div></div>
+      <div style="font-family: sans-serif; font-size: 0.88rem; margin: 12px 0 8px; display:flex; justify-content: space-between;">
+        <span><strong>1 Opposed</strong></span><span style="color: var(--red);">7.7%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width: 7.7%; background: var(--red);"></div></div>
+      <p style="font-family: sans-serif; font-size: 0.78rem; color: var(--gray); margin-top: 10px;">Of 13 speakers at the March 16, 2026 Board of Education meeting</p>
+    </div>
+
+    <div class="alert-box warning" style="margin-top: 30px;">
+      <div class="alert-icon">⚠️</div>
+      <p><strong>Important context:</strong> One Facebook commenter noted the 12-to-1 in-person support ratio may reflect a <em>"coordinated effort by an LGBTQ group to have a strong presence"</em> at the meeting, and that those who commented hatefully online may have been <em>"too cowardly to actually stand up and speak to the board face to face."</em> This disparity between digital and physical community response is a central theme of the controversy.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BOARD MEETING -->
+<section id="board-meeting" style="background: white;">
+  <div class="container">
+    <div class="section-label">March 16, 2026 Board Meeting</div>
+    <h2>13 Speakers. One Unmistakable Message.</h2>
+    <p class="section-intro">The Board of Education meeting on March 16 revealed a stark disconnect between the hateful online response and the community that physically showed up. Here is a full breakdown of every public speaker and their testimony.</p>
+
+    <div class="speaker-grid">
+      <div class="speaker-card" onclick="openModal('modal-speaker-mueller')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Paula Mueller</h5>
+        <div class="role">Batavia parent, Speaker #1</div>
+        <div class="preview">"She's a leader in an ongoing fight for human rights and it was great comfort to see..."</div>
+      </div>
+      <div class="speaker-card" onclick="openModal('modal-speaker-delmaso')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Heather Delmaso</h5>
+        <div class="role">Batavia parent (BHS grad + current freshman), Speaker #2</div>
+        <div class="preview">"They are not political talking points. They are real kids in this district..."</div>
+      </div>
+      <div class="speaker-card" onclick="openModal('modal-speaker-aragon')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Wilma Van Aragon</h5>
+        <div class="role">Batavia resident 14 yrs, retired educator/nurse, Speaker #3</div>
+        <div class="preview">"From attacks on identity to attempts to roll back equality, it's important to stand together..."</div>
+      </div>
+      <div class="speaker-card" onclick="openModal('modal-speaker-hatfield')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Ryan Hatfield</h5>
+        <div class="role">Batavia resident since 2019, Speaker #4</div>
+        <div class="preview">"Trans women are women and the month of March should celebrate women from a wide range of backgrounds..."</div>
+      </div>
+      <div class="speaker-card" onclick="openModal('modal-speaker-kaya')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Kaya (Kan Clark)</h5>
+        <div class="role">Young professional, LGBTQ resident, Speaker #5</div>
+        <div class="preview">"I am a lesbian and I was terrified that moving to a smaller town would be scary..."</div>
+      </div>
+      <div class="speaker-card" onclick="openModal('modal-speaker-kendall')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Chrissy White Kendall</h5>
+        <div class="role">Batavia resident since 2021, Speaker #6</div>
+        <div class="preview">"Batavia is a place with many different perspectives — rainbow flags and back the blue signs side by side..."</div>
+      </div>
+      <div class="speaker-card oppose" onclick="openModal('modal-speaker-den')">
+        <span class="speaker-badge badge-oppose">Opposed</span>
+        <h5>Richard Den</h5>
+        <div class="role">Batavia resident, Speaker #7 — the lone opponent</div>
+        <div class="preview">"I'm requesting the immediate firing of the director of communications and asking the board to resign..."</div>
+      </div>
+      <div class="speaker-card" onclick="openModal('modal-speaker-sperry')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Matt Sperry</h5>
+        <div class="role">Attorney, BHS Class of '99, Speaker #8</div>
+        <div class="preview">"I view what's been going on as a teaching moment for my own children..."</div>
+      </div>
+      <div class="speaker-card" onclick="openModal('modal-speaker-hem')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Missy (Melissa) Hem</h5>
+        <div class="role">BPS parent, Speaker #9</div>
+        <div class="preview">"I was really pleasantly surprised to see the post honoring Congresswoman McBride..."</div>
+      </div>
+      <div class="speaker-card" onclick="openModal('modal-speaker-ford')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Sunny Ford</h5>
+        <div class="role">Geneva resident, Speaker #10</div>
+        <div class="preview">"It is hard to be a transgender teenager. The school made a difference with that post..."</div>
+      </div>
+      <div class="speaker-card" onclick="openModal('modal-speaker-theobald')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Denise Theobald</h5>
+        <div class="role">Geneva resident, Speaker #11</div>
+        <div class="preview">"Acknowledging leaders who have broken barriers sends a message that history is still being written..."</div>
+      </div>
+      <div class="speaker-card" onclick="openModal('modal-speaker-eckleston')">
+        <span class="speaker-badge badge-support">Support</span>
+        <h5>Elizabeth Eckleston</h5>
+        <div class="role">Batavia resident, ILP parent, Final Speaker #12/13</div>
+        <div class="preview">"Our lives are vastly improved when we celebrate the contributions of our marginalized communities..."</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 40px;">
+      <div class="highlight-box">
+        <h3>Board Member Katy Swiecki's Closing Statement</h3>
+        <div class="big-quote">"Happy spring break. Happy Women's History Month. Trans women are women. And all children belong in BPS101."</div>
+        <p>This was the board's definitive, on-the-record institutional response to the controversy — delivered publicly at the March 16 meeting.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMUNITY VOICES -->
+<section id="voices">
+  <div class="container">
+    <div class="section-label">Community Voices</div>
+    <h2>What Batavia Residents Said</h2>
+    <p class="section-intro">Beyond the board meeting, these quotes from board meeting testimony represent the range of community perspectives — from deep support to genuine concern.</p>
+
+    <div class="quote-grid">
+      <div class="quote-card support">
+        <blockquote>"They are not political talking points. They are real kids in this district. They participate in sports, perform in band and theater, belong to clubs and honor societies, and sit in classrooms every day with all the other students."</blockquote>
+        <div class="speaker">Heather Delmaso</div>
+        <div class="speaker-role">Batavia parent, March 16 Board Meeting</div>
+      </div>
+      <div class="quote-card support">
+        <blockquote>"Research from the National Institutes of Health and the Trevor Project demonstrates that for trans and non-binary youth who have affirming adults and spaces in their lives, they have 40% less risk of attempting suicide compared with their unsupported trans peers."</blockquote>
+        <div class="speaker">Board Meeting Speaker</div>
+        <div class="speaker-role">Citing NIH & Trevor Project data, March 16</div>
+      </div>
+      <div class="quote-card support">
+        <blockquote>"Trans women are women and the month of March should celebrate women from a wide range of backgrounds and identities. Sarah won the general election in November 2024 with 58% of the vote and became the first openly transgender member of the US Congress on January 3rd of 2025."</blockquote>
+        <div class="speaker">Ryan Hatfield</div>
+        <div class="speaker-role">Batavia Resident Since 2019, March 16</div>
+      </div>
+      <div class="quote-card oppose">
+        <blockquote>"I'm wondering how in a town of 27,000 people you can't find one female to celebrate. That's pretty sad. How do you believe this impacts the self-esteem of real girls within this school district?"</blockquote>
+        <div class="speaker">Richard Den</div>
+        <div class="speaker-role">Sole Opponent, March 16 Board Meeting</div>
+      </div>
+      <div class="quote-card support">
+        <blockquote>"I saw that post and I was like, 'Wow that's so cool.' And then I saw the comments and I saw the post get deleted. I hope that the board remembers that when you make posts like that, you are putting up a flag that says, 'Hey, we care about you.'"</blockquote>
+        <div class="speaker">Kaya (Kan Clark)</div>
+        <div class="speaker-role">Young Professional, LGBTQ Resident</div>
+      </div>
+      <div class="quote-card neutral">
+        <blockquote>"I stand firm on my opinion that it was a poor choice to feature Sarah McBride for women's history month, but I am also disgusted by the way many people who share that opinion chose to respond. We need to do better."</blockquote>
+        <div class="speaker">Holly Miller</div>
+        <div class="speaker-role">Facebook Comment, Batavia Community Forum</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 40px;">
+      <h3 style="color: var(--blue); margin-bottom: 20px;">The Mental Health Argument — Expanded</h3>
+      <div class="accordion open" onclick="this.classList.toggle('open')">
+        <div class="accordion-header">
+          <span>Heather Delmaso: "Real Kids, Not Political Talking Points"</span>
+          <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-support">Support</span><span class="accordion-chevron">▼</span></span>
+        </div>
+        <div class="accordion-body">
+          <p>Delmaso's full testimony centered on the statistical reality of LGBTQ youth in the district. She cited that <strong>roughly 9 to 10% of teenagers identify as LGBTQ</strong>, meaning in any school, on any team, or in any club, there are students who fall into that group. She emphasized that these youth experience <strong>significantly higher rates of depression and suicide attempts</strong>, and that research consistently shows one of the strongest protective factors is "feeling accepted and safe in the communities around them."</p>
+          <p style="margin-top: 12px;">Her argument was that for some students, "simply seeing that their school recognizes that reality can help them feel safe and accepted and know they belong here too." She concluded: <em>"They are not political talking points. They are real kids in this district. They participate in sports, perform in band and theater, belong to clubs and honor societies."</em></p>
+        </div>
+      </div>
+
+      <div class="accordion" onclick="this.classList.toggle('open')">
+        <div class="accordion-header">
+          <span>The 40% Statistic: NIH & Trevor Project Research</span>
+          <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-support">Data</span><span class="accordion-chevron">▼</span></span>
+        </div>
+        <div class="accordion-body">
+          <p>A speaker at the meeting cited specific research: <em>"I think of preventing and responding to bullying, using the correct pronouns — I think of that as suicide prevention. Research from the National Institutes of Health and the Trevor Project demonstrates that for trans and non-binary youth who have affirming adults and spaces in their lives, they have <strong>40% less risk of attempting suicide</strong> compared with their unsupported trans peers."</em></p>
+          <p style="margin-top: 12px;">This statistic reframed the controversy from a debate about "wokeism" to a matter of public health and institutional responsibility. The speaker argued that the post was not a political statement but a safety intervention, and that its deletion amounted to "capitulating to bullies."</p>
+        </div>
+      </div>
+
+      <div class="accordion" onclick="this.classList.toggle('open')">
+        <div class="accordion-header">
+          <span>Richard Den: The Opposition Case</span>
+          <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-oppose">Opposed</span><span class="accordion-chevron">▼</span></span>
+        </div>
+        <div class="accordion-body">
+          <p>Richard Den was the sole speaker in opposition. His testimony contained several points of critique: he demanded the immediate firing of the Communications Director (referring to her as "Miss Dipman"), asked all board members to resign, and questioned how "in a town of 27,000 people you can't find one female to celebrate." He also argued the post contained factual errors — calling McBride a "senator" when she is a Representative — and claimed the post "negatively impacted the self-esteem of real girls within this school district."</p>
+          <p style="margin-top: 12px;">When he attempted to ask the board directly whether they "support teaching children that men can become females," the Board President replied: <em>"Not at all."</em> (meaning not during public comment). His request for a direct answer was declined per board procedures.</p>
+          <div class="alert-box danger" style="margin-top: 14px;">
+            <div class="alert-icon">⚡</div>
+            <p>Den also cited Trump's Executive Order "Ending Radical Indoctrination in K-12 Schooling," suggesting the post may have jeopardized federal funding — an argument also made extensively in conservative media coverage.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion" onclick="this.classList.toggle('open')">
+        <div class="accordion-header">
+          <span>Ryan Hatfield: The Civics Argument</span>
+          <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-support">Support</span><span class="accordion-chevron">▼</span></span>
+        </div>
+        <div class="accordion-body">
+          <p>Hatfield presented what the analysis calls the "Civics Narrative" — celebrating McBride not as an ideological statement but as recognition of a historic democratic achievement. He noted McBride <strong>won the November 2024 general election with 58% of the vote</strong>, becoming the first openly transgender member of the US Congress on January 3, 2025.</p>
+          <p style="margin-top: 12px;">His argument: <em>"The post and the inclusion of Sarah doesn't take away from but rather enhances the broader picture of the contributions and achievement of all women. It showcases the diversity of women and helps paint a complete picture."</em></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEDIA COVERAGE -->
+<section id="media" style="background: white;">
+  <div class="container">
+    <div class="section-label">Media Coverage Analysis</div>
+    <h2>How the Story Was Told — and By Whom</h2>
+    <p class="section-intro">The same local post was covered radically differently depending on the outlet's audience and ideological orientation. The "nationalization of the local" is a defining feature of this controversy.</p>
+
+    <div class="media-grid">
+      <div class="media-card conservative" onclick="openModal('modal-media-conservative')">
+        <div class="outlet-type">Conservative / National</div>
+        <h4>Breakthrough Ideas, Daily Caller, Tucker Carlson platforms</h4>
+        <p>Framed the post as "trans superstition," "radical indoctrination," and a threat to federal funding. Demanded firings.</p>
+        <div class="cta"><span class="btn btn-sm" style="background: var(--red);">Read Deep Dive ↗</span></div>
+      </div>
+      <div class="media-card local" onclick="openModal('modal-media-local')">
+        <div class="outlet-type">Local / Community</div>
+        <h4>Shaw Local / Kane County Chronicle</h4>
+        <p>Documented the 12-to-1 support ratio at the board meeting and the disconnect between online hate and physical community support.</p>
+        <div class="cta"><span class="btn btn-sm" style="background: var(--green);">Read Deep Dive ↗</span></div>
+      </div>
+      <div class="media-card" onclick="openModal('modal-media-blog')">
+        <div class="outlet-type">Community Blog</div>
+        <h4>Batavia 5th Ward Blog</h4>
+        <p>Detailed board meeting coverage documenting the social media controversy alongside infrastructure crises and new district initiatives.</p>
+        <div class="cta"><span class="btn btn-sm">Read Deep Dive ↗</span></div>
+      </div>
+      <div class="media-card national" onclick="openModal('modal-media-global')">
+        <div class="outlet-type">Global Context</div>
+        <h4>The Guardian (IWD Website Controversy)</h4>
+        <p>Reported parallel controversy: the UN distancing itself from internationalwomensday.com, accused of "exploiting" the day for financial gain.</p>
+        <div class="cta"><span class="btn btn-sm" style="background: #7c3aed;">Read Deep Dive ↗</span></div>
+      </div>
+    </div>
+
+    <div style="margin-top: 40px;">
+      <h3 style="color: var(--blue); margin-bottom: 20px;">The "Counter-Canon": Women the District Could Have Featured</h3>
+      <p style="font-size: 0.92rem; color: var(--gray); margin-bottom: 20px;"><em>Breakthrough Ideas</em> provided a detailed list of women "not celebrated" by BPS101, framing their omission as evidence of ideological preference. The list functions as a rhetorical device rather than a sincere curriculum argument.</p>
+
+      <div class="accordion" onclick="this.classList.toggle('open')">
+        <div class="accordion-header">
+          <span>Conservative Media's "Counter-Canon" — Women BPS101 Didn't Feature</span>
+          <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-national">Conservative Media</span><span class="accordion-chevron">▼</span></span>
+        </div>
+        <div class="accordion-body">
+          <p>According to <em>Breakthrough Ideas</em>, BPS101 ignored these women in favor of McBride — a choice they attributed to "ignorant activists" in the communications department:</p>
+          <table class="modal-table" style="margin-top: 16px;">
+            <tr><th>Name</th><th>Significance Cited</th></tr>
+            <tr><td>Amy Coney Barrett</td><td>U.S. Supreme Court Justice</td></tr>
+            <tr><td>Condoleezza Rice</td><td>Former Secretary of State and academic leader</td></tr>
+            <tr><td>Phyllis Schlafly</td><td>Constitutional lawyer, leader of the STOP ERA movement</td></tr>
+            <tr><td>Sarah Huckabee Sanders</td><td>Governor of Arkansas, former White House Press Secretary</td></tr>
+            <tr><td>Harriet Beecher Stowe</td><td>Author of Uncle Tom's Cabin, abolitionist</td></tr>
+            <tr><td>Clara Barton</td><td>Founder of the American Red Cross</td></tr>
+            <tr><td>Riley Gaines</td><td>Former swimmer, advocate for sex-segregated sports</td></tr>
+          </table>
+          <p style="margin-top: 14px; font-size: 0.88rem;"><strong>Note:</strong> Facebook commenter Tabitha Simon also suggested local Batavia figures Gladys Larson or Rachel Newton would have been "better picks," arguing the district should highlight its own community heroes.</p>
+        </div>
+      </div>
+
+      <div class="accordion" onclick="this.classList.toggle('open')">
+        <div class="accordion-header">
+          <span>BPS101's Own Communications Guidelines — Used Against Them</span>
+          <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-national">Policy Critique</span><span class="accordion-chevron">▼</span></span>
+        </div>
+        <div class="accordion-body">
+          <p>Critics in the media used BPS101's own Communication Guidelines as a tool of critique. The guidelines state: <em>"Any stories resulting from a politician's visit to a school are not an endorsement and will remain neutral in tone and content."</em></p>
+          <p style="margin-top: 12px;">Conservative media argued that the McBride post — described as "glowing" and "jubilant" with "a childishly enthusiastic exclamation point" — violated this stated neutrality policy.</p>
+          <table class="modal-table" style="margin-top: 16px;">
+            <tr><th>Channel</th><th>Frequency</th><th>Stated Goal</th></tr>
+            <tr><td>School Facebook Pages</td><td>2–3x per week</td><td>Important announcements, upcoming events, news stories</td></tr>
+            <tr><td>School Twitter/X</td><td>Daily</td><td>Keep parents and staff current</td></tr>
+            <tr><td>Instagram</td><td>Weekly</td><td>Visually share events and celebrations</td></tr>
+            <tr><td>District Website</td><td>Continuous</td><td>Central hub and primary information authority</td></tr>
+            <tr><td>District E-Newsletter</td><td>Weekly</td><td>Consolidate all important district updates</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="accordion" onclick="this.classList.toggle('open')">
+        <div class="accordion-header">
+          <span>The "Ontological Critique" — Breakthrough Ideas' Philosophical Framing</span>
+          <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-national">Conservative Media</span><span class="accordion-chevron">▼</span></span>
+        </div>
+        <div class="accordion-body">
+          <p><em>Breakthrough Ideas</em> moved beyond political disagreement into what the analysis calls "ontological dispute." The outlet characterized the district's post as endorsing a "trans superstition" that <em>"denies the meaning of physical embodiment"</em> — using the phrase "Gnostic superstition" to describe gender identity and the imagery of "a gendered ghost inside the wrong machine."</p>
+          <p style="margin-top: 12px;">This rhetorical strategy serves to move the debate away from civil rights and into a fundamental conflict over the nature of reality. By framing gender dysphoria as something with "no proof," the outlet delegitimizes not just McBride's recognition but the entire conceptual framework of transgender identity.</p>
+          <p style="margin-top: 12px;">The outlet also linked the post to Trump's Executive Order <strong>"Ending Radical Indoctrination in K-12 Schooling"</strong>, suggesting BPS101 had potentially jeopardized federal funding — converting an administrative choice into a financial risk argument for taxpayers.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POLICY CHANGES -->
+<section id="policy">
+  <div class="container">
+    <div class="section-label">Institutional Response</div>
+    <h2>How BPS101 Changed After the Controversy</h2>
+    <p class="section-intro">The controversy triggered a fundamental rethinking of how the district communicates with its community — a strategic retreat from interactive social media toward controlled, one-way channels.</p>
+
+    <div class="two-col">
+      <div>
+        <h3 style="color: var(--blue); margin-bottom: 16px;">The Deletion Decision</h3>
+        <p>Communications Director Holly Deitchman stated the post was deleted based on <strong>legal advice</strong> and that it <em>"no longer served its educational purpose"</em> once it became a magnet for vitriol. The district made clear the removal was to protect students from further harm, not to capitulate to the criticism of the post's content.</p>
+        <br>
+        <div class="alert-box danger">
+          <div class="alert-icon">🔒</div>
+          <p><strong>New Policy:</strong> <em>"All comments will be turned off on future social media posts."</em> This represents a strategic shift from an interactive public forum model to a broadcast-only model.</p>
+        </div>
+        <br>
+        <p>Supporters at the meeting were disappointed. Several speakers urged the district to develop a <strong>"plan to handle online hostility"</strong> rather than resorting to deletion and silence. One community member argued the district was setting "a poor example" for the very students it is tasked with protecting.</p>
+        <br>
+        <div class="alert-box warning">
+          <div class="alert-icon">⚠️</div>
+          <p><strong>The Dunning Problem:</strong> A Facebook commenter noted that before deletion, <em>"multiple conservative groups from around the country took screenshots... It's still circulating, still being shared, still sparking disgusting, hateful comments from a widespread audience."</em> Deletion was effectively too late.</p>
+        </div>
+      </div>
+      <div>
+        <h3 style="color: var(--blue); margin-bottom: 16px;">New Communication Initiatives</h3>
+        <div class="accordion" onclick="this.classList.toggle('open')">
+          <div class="accordion-header">
+            <span>📰 The District Dispatch (Print Newsletter)</span>
+            <span class="accordion-chevron">▼</span>
+          </div>
+          <div class="accordion-body">
+            <p>A new print newsletter mailed to <strong>all residences</strong> in the community, <strong>twice per year</strong>. The first issue was mailed March 20, 2026 — just days after the controversy peaked. It featured a story on the first-grade team at Grace McWain and a letter from the Superintendent. This deliberately bypasses social media algorithms that favor outrage and rage-clicks.</p>
+          </div>
+        </div>
+        <div class="accordion" onclick="this.classList.toggle('open')">
+          <div class="accordion-header">
+            <span>🎙️ "Kids These Days" Podcast</span>
+            <span class="accordion-chevron">▼</span>
+          </div>
+          <div class="accordion-body">
+            <p>An intergenerational conversation podcast where older community members and high school students discuss shared topics. The first episode was recorded two weeks before the March 16 meeting, featuring a BHS senior student and Craig Foltos, a local barbershop owner. The aim: give older residents who say "kids these days" a real foundation for that conversation with actual students.</p>
+          </div>
+        </div>
+        <div class="accordion" onclick="this.classList.toggle('open')">
+          <div class="accordion-header">
+            <span>🎓 Student Board Member Program</span>
+            <span class="accordion-chevron">▼</span>
+          </div>
+          <div class="accordion-body">
+            <p>The board moved an action item to invite Batavia High School students to apply for roles as <strong>Student Representatives</strong>, providing an advisory role, sharing student perspectives, and "amplifying the voices of younger students" in board governance. This directly responds to criticism that the district was making decisions about students without adequately involving them.</p>
+          </div>
+        </div>
+        <div class="accordion" onclick="this.classList.toggle('open')">
+          <div class="accordion-header">
+            <span>📚 Book Vending Machine at Hooverwood</span>
+            <span class="accordion-chevron">▼</span>
+          </div>
+          <div class="accordion-body">
+            <p>While not a direct response to the controversy, Principal Sean Diamond's book vending machine at Hooverwood Elementary — celebrated at the same March 16 meeting — was highlighted by analysts as a deliberate "positive counter-narrative." The machine holds <strong>300 books</strong>, has distributed approximately <strong>40 books</strong> in its first month, and features "award-winning, diverse books" curated by the principal. Students earn books through reading challenges, behavior programs, and classroom activities.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INFRASTRUCTURE -->
+<section id="infrastructure" style="background: white;">
+  <div class="container">
+    <div class="section-label">The Overlooked Story</div>
+    <h2>While the Culture War Raged: A District in Physical Crisis</h2>
+    <p class="section-intro">Media coverage of the March 16 board meeting juxtaposed the social media firestorm with BPS101's dire infrastructure reality — a stark reminder of what was competing for attention and resources.</p>
+
+    <div class="alert-box warning">
+      <div class="alert-icon">🏚️</div>
+      <p><strong>The "distraction" narrative:</strong> While the community was polarized over a Facebook post, the district's physical plant was literally failing. A pipe failure at JB Nelson in early January 2026 was described as a near-disaster: <em>"If that happened in the deepest cold... that would be a real serious problem. We could lose the whole building."</em></p>
+    </div>
+
+    <table class="infra-table" style="margin: 30px 0;">
+      <tr>
+        <th>Project</th>
+        <th>Age / Scope</th>
+        <th>Estimated Cost</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td><strong>HLS Phase 1</strong><br>Fire alarms + unit ventilators (HS, middle school, Routolo, JB Nelson, Gustoson)</td>
+        <td>1989–1992 era equipment; original unit ventilators from building opening</td>
+        <td class="cost">~$11.3 million</td>
+        <td>HLS bond process initiated</td>
+      </tr>
+      <tr>
+        <td><strong>HLS Phase 2</strong><br>Additional ventilation upgrades, possible system replacements</td>
+        <td>10–15 year horizon</td>
+        <td class="cost">~$6.3 million</td>
+        <td>Architecture review underway; subject to change</td>
+      </tr>
+      <tr>
+        <td><strong>70-Year-Old Galvanized Pipes</strong><br>JB Nelson School tunnel basement piping</td>
+        <td>Non-conditioned tunnel space; failure occurred January 2026</td>
+        <td class="cost">Unquantified</td>
+        <td>Emergency patched; long-term replacement needed</td>
+      </tr>
+      <tr>
+        <td><strong>Elementary Kitchen Equipment</strong><br>Cook-and-hold ovens + commercial refrigerators to replace residential units</td>
+        <td>Current freezers described as having "almost nothing in them"</td>
+        <td class="cost">Unspecified</td>
+        <td>Purchase approved</td>
+      </tr>
+      <tr>
+        <td><strong>Hooverwood & Grace McWain</strong><br>25-year-old buildings approaching major system replacement cycle</td>
+        <td>Built ~2000; all major systems reaching 25-year horizon</td>
+        <td class="cost">Future planning phase</td>
+        <td>5–10 year planning window</td>
+      </tr>
+    </table>
+
+    <div class="two-col">
+      <div>
+        <h4 style="color: var(--blue); margin-bottom: 12px;">The Failed Referendum Context</h4>
+        <p style="font-size: 0.92rem; color: #444;">Previous referendums to replace aging buildings like H.C. Storm and Louise White had failed twice — largely due to voter opposition to tax increases. The failed $140 million referendum forced the district to renovate rather than rebuild, avoiding "sunk costs" but leaving the infrastructure crisis unresolved.</p>
+        <br>
+        <p style="font-size: 0.92rem; color: #444;">Because voters rejected tax increases, BPS101 is now seeking state approval for HLS bonds — a mechanism that bypasses the referendum process for health and life safety projects specifically. One board member noted the community "probably aren't going to like the $155 a year or whatever it works out as, but people will like it even less if their kids are in school and something terrible happens."</p>
+      </div>
+      <div>
+        <div class="highlight-box">
+          <h3>The Contrast</h3>
+          <p style="opacity: 0.9; font-size: 0.95rem;">The board meeting that night covered:</p>
+          <ul style="opacity: 0.85; font-size: 0.92rem; padding-left: 20px; margin-top: 10px; line-height: 2;">
+            <li>A culture war over a social media post</li>
+            <li>$17.6M+ in failing infrastructure</li>
+            <li>70-year-old pipes that nearly caused catastrophic building loss</li>
+            <li>Boundary adjustments for new housing developments</li>
+            <li>A new print newsletter and podcast launch</li>
+            <li>A book vending machine</li>
+          </ul>
+          <p style="margin-top: 14px; opacity: 0.85; font-size: 0.9rem;">The ideological noise was real — but so was the physical reality competing for the board's attention.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FACEBOOK COMMENTS -->
+<section id="facebook">
+  <div class="container">
+    <div class="section-label">Facebook Comments: Batavia Community Group</div>
+    <h2>The Online Conversation — Unfiltered</h2>
+    <p class="section-intro">The Batavia community Facebook group captured a range of responses that differed notably from both the board meeting testimony and the national conservative media coverage. These are organized by theme.</p>
+
+    <div class="pill-row">
+      <span class="pill">12 to 1 support at meeting</span>
+      <span class="pill">National conservative amplification</span>
+      <span class="pill">LGBTQ complexity discussions</span>
+      <span class="pill">Local hero alternatives suggested</span>
+      <span class="pill">Calls for district accountability</span>
+    </div>
+
+    <div class="accordion" onclick="this.classList.toggle('open')">
+      <div class="accordion-header">
+        <span>On District Accountability & Silence — Mark Putnam & Holly Miller</span>
+        <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-neutral">Accountability</span><span class="accordion-chevron">▼</span></span>
+      </div>
+      <div class="accordion-body">
+        <p><strong>Mark Putnam:</strong> <em>"An unnecessary and poorly handled mess. And still missing from the district is an explanation about why it was handled in this manner, what lessons it learned, what measures it will take to make certain a similar episode doesn't occur again, and how it intends to better serve these marginalized students. The district's silence is unsettling."</em></p>
+        <p style="margin-top: 12px;"><strong>Holly Miller's response:</strong> <em>"My hope is that the delay is due to them taking the time to really reflect on the situation and think things through, so as not to make it even worse with a trite and insufficient response."</em></p>
+        <p style="margin-top: 12px;"><strong>Holly Miller (later):</strong> <em>"I feel like, in general, our board and administration do a lousy job of both acknowledging and addressing conflict. They tend to skirt around the issues and sweep things under the rug. As long as they keep avoiding the issues, there will always be a 'next time.'"</em></p>
+      </div>
+    </div>
+
+    <div class="accordion" onclick="this.classList.toggle('open')">
+      <div class="accordion-header">
+        <span>On the 12-to-1 Board Meeting Result — Devin Long & Holly Miller</span>
+        <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-support">Debate</span><span class="accordion-chevron">▼</span></span>
+      </div>
+      <div class="accordion-body">
+        <p><strong>Devin Long:</strong> <em>"I came for the controversy and was sadly disappointed... it was 12 to 1 in support of the post! Is there live footage somewhere of the guy demanding the whole board resign?! I bet it was great! Good job Batavia, you give me hope."</em></p>
+        <p style="margin-top: 12px;"><strong>Holly Miller's counter:</strong> <em>"That's because there was a coordinated effort by an LGBTQ group to have a strong presence there, and probably because the keyboard warriors who were triggered by it are too cowardly to actually stand up and speak to the board face to face. It doesn't mean it was a good decision by the district to run this feature, though."</em></p>
+        <p style="margin-top: 12px;"><strong>Holly Miller (continuing):</strong> <em>"The district should have anticipated the response they received on social media, and they should have given some consideration to the damage that response might do to our LGBTQ students... I'm very disappointed in our district, and I'm thankful that they at least had the good sense to minimize the damage by taking the post down, but it never should have been posted in the first place."</em></p>
+        <p style="margin-top: 12px;"><strong>Devin Long's reply:</strong> <em>"Being scared of someone's reaction is the absolute wrong reason not to do something... that is literally gaslighting."</em></p>
+      </div>
+    </div>
+
+    <div class="accordion" onclick="this.classList.toggle('open')">
+      <div class="accordion-header">
+        <span>On the Complexity of LGBTQ+ Identity — Holly Miller's Extended Analysis</span>
+        <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-neutral">Nuanced Discussion</span><span class="accordion-chevron">▼</span></span>
+      </div>
+      <div class="accordion-body">
+        <p>One of the most substantive Facebook exchanges involved Holly Miller discussing what she had learned about the complexity of LGBTQ+ identity from having a child in the community:</p>
+        <p style="margin-top: 12px;"><em>"I don't believe any trans students were upset about the post itself. It was the comments on the post that were upsetting to students. There were, however, some lesbian students who were upset by the post, as they also felt slighted and 'unseen' by the district. They felt that the district should have featured a biological woman for women's history month."</em></p>
+        <p style="margin-top: 12px;"><em>"Our society, and especially our Batavia community, groups trans people in with LGB people, and we shouldn't. They are not the same. They may be kindred spirits in some ways and share some challenges, but they do not represent each other. They face very different struggles, different levels of acceptance, different types of adversity."</em></p>
+        <p style="margin-top: 12px;"><em>"I've learned that there are LGB people who don't believe transgender women should be allowed to compete in women's sports or use women's restrooms/locker rooms... There's so much more, I could write a book, but I'm going to leave it there. As I've said, it's so much more complex than we tend to make it."</em></p>
+      </div>
+    </div>
+
+    <div class="accordion" onclick="this.classList.toggle('open')">
+      <div class="accordion-header">
+        <span>On Transgender Inclusion in Language — Stefin Steberl</span>
+        <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-support">LGBTQ+ Perspective</span><span class="accordion-chevron">▼</span></span>
+      </div>
+      <div class="accordion-body">
+        <p><strong>Stefin Steberl:</strong> <em>"I appreciate the concern for transgender students...that matters and those are the folks whose voices should be centered. I do want to gently challenge one point. Transgender women are women. Saying someone 'lived as a boy or man' isn't how many transgender people experience their lives. It reflects how others may have perceived them, not who they are."</em></p>
+        <p style="margin-top: 12px;"><em>"Recognizing transgender women during Women's History Month is appropriate. Their experiences are part of women's history. Using 'transgender' as a descriptor is no different than highlighting another aspect of identity, like Black or disabled; the experience is still that of Women."</em></p>
+        <p style="margin-top: 12px;"><strong>Holly Miller's honest reply:</strong> <em>"For me, personally, it's still hard for me to see transgender women as 'real' women. I know that's how they want to be seen, but I'm just being honest about my own experience. It's something I struggle with, and I know many others do as well."</em></p>
+      </div>
+    </div>
+
+    <div class="accordion" onclick="this.classList.toggle('open')">
+      <div class="accordion-header">
+        <span>On the Impact on Students — Holly Miller & Carmen Mann Hampson</span>
+        <span style="display: flex; gap: 10px; align-items: center;"><span class="tag tag-neutral">Student Impact</span><span class="accordion-chevron">▼</span></span>
+      </div>
+      <div class="accordion-body">
+        <p><strong>Holly Miller:</strong> <em>"I was sickened by what I saw [in the comments]. What was most sickening to me was that many of the comments were directed, not at the district, but at transgender people. There is absolutely no reason for anyone to respond with the kind of hate that I saw in those comments. That has to stop, and it won't stop without candid conversations."</em></p>
+        <p style="margin-top: 12px;"><strong>Carmen Mann Hampson:</strong> <em>"I would be interested to know how transgender students felt about the post. My initial reaction when I saw it was relief. These students are receiving many hateful comments coming from many directions, so I was happy to see BPS showing love and respect toward these students."</em></p>
+        <p style="margin-top: 12px;"><strong>Holly Miller:</strong> <em>"I hope they are taking good care of those students who were hurt by this and providing them the resources they need to cope with some of the awful things that were said."</em></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONCLUSION -->
+<section style="background: var(--blue); color: white; padding: 80px 0;">
+  <div class="container">
+    <div class="section-label" style="color: var(--gold);">Conclusion</div>
+    <h2 style="color: white; margin-bottom: 20px;">The Media as a Catalyst for Institutional Evolution</h2>
+    <div class="two-col">
+      <div>
+        <p style="opacity: 0.9; margin-bottom: 16px;">The BPS101 controversy illustrates the high stakes of institutional communication in 2026. A single social media post — intended to celebrate Women's History Month — became a case study in how local decisions are consumed by national ideological machinery.</p>
+        <p style="opacity: 0.9; margin-bottom: 16px;">The "40% reduction in suicide risk" statistic stands as the central pillar of the district's defense, transforming the debate from one about "superstition" to one about "safety." The 12-to-1 ratio at the board meeting reveals a community that, in its physical form, remained largely supportive of inclusive goals — even as digital platforms amplified a hateful minority.</p>
+        <p style="opacity: 0.9;">Ultimately, BPS101's response — deleting the post, disabling comments, launching print newsletters and podcasts — represents the emerging standard for public institutions navigating the "architecture of outrage." Whether this represents wise crisis management or a surrender to intimidation remains the defining question the community continues to debate.</p>
+      </div>
+      <div>
+        <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 28px;">
+          <h3 style="margin-bottom: 16px; font-size: 1.1rem;">The Three Unanswered Questions</h3>
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="background: rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+              <p style="font-family: sans-serif; font-size: 0.85rem; opacity: 0.9;"><strong>1.</strong> Should BPS101 have anticipated the national amplification, and does anticipating backlash mean accepting self-censorship?</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+              <p style="font-family: sans-serif; font-size: 0.85rem; opacity: 0.9;"><strong>2.</strong> Does disabling comments "protect students" or does it silence the community dialogue that support and affirmation actually require?</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+              <p style="font-family: sans-serif; font-size: 0.85rem; opacity: 0.9;"><strong>3.</strong> With $17.6M+ in failing infrastructure and a community polarized by a deleted post, where should BPS101's leadership direct its finite energy and political capital?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========= MODALS ========= -->
+
+<!-- McBride Modal -->
+<div class="modal-overlay" id="modal-mcbride" onclick="if(event.target===this)closeModal('modal-mcbride')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Deep Dive: Who Is Sarah McBride?</h3>
+      <button class="modal-close" onclick="closeModal('modal-mcbride')">×</button>
+    </div>
+    <div class="modal-body">
+      <h4>Biographical Facts</h4>
+      <ul>
+        <li>Born in Wilmington, Delaware</li>
+        <li>Former National Press Secretary for the Human Rights Campaign (HRC)</li>
+        <li>Served in the Delaware State Senate — instrumental in passing the <strong>Healthy Delaware Families Act</strong>, which provided paid family and medical leave</li>
+        <li>Expanded school-based mental health programs during her state legislative tenure</li>
+        <li>Won the November 2024 general election with <strong>58% of the vote</strong></li>
+        <li>Sworn in as the <strong>first openly transgender member of the United States Congress</strong> on January 3, 2025</li>
+      </ul>
+      <h4>Endorsements</h4>
+      <p>McBride was endorsed by the National Education Association (NEA) for her congressional run. She also received endorsements from Sen. John Fetterman and other Democratic figures.</p>
+      <h4>Why BPS101 Featured Her</h4>
+      <p>The district characterized McBride as "groundbreaking" and her work as "instrumental" in passing non-discrimination laws. Her historic election as the first transgender Congressperson made her a natural choice for a Women's History Month post celebrating political firsts and representation.</p>
+      <h4>The Criticism</h4>
+      <p>Critics argued: (1) McBride has no ties to Batavia; (2) her "personal history has mostly been lived as a boy and man" (Holly Miller, Facebook); (3) a Women's History Month post should feature "a biological woman." The most extreme critics used dehumanizing language, calling her a "crossdressing man" and a "biological male."</p>
+      <div class="alert-box info" style="margin-top: 14px;">
+        <div class="alert-icon">ℹ️</div>
+        <p>Facebook commenter Stefin Steberl noted: "Saying someone 'lived as a boy or man' isn't how many transgender people experience their lives. It reflects how others may have perceived them, not who they are."</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Deep Dive Modal -->
+<div class="modal-overlay" id="modal-stats-deep" onclick="if(event.target===this)closeModal('modal-stats-deep')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Full Statistical Context</h3>
+      <button class="modal-close" onclick="closeModal('modal-stats-deep')">×</button>
+    </div>
+    <div class="modal-body">
+      <h4>Mental Health Statistics (NIH & Trevor Project)</h4>
+      <table class="modal-table">
+        <tr><th>Context</th><th>Outcome</th></tr>
+        <tr><td>Trans/non-binary youth in affirming environments</td><td><strong>40% lower suicide attempt risk</strong> vs. unsupported peers</td></tr>
+        <tr><td>LGBTQ youth as share of all teenagers</td><td><strong>9–10%</strong> identify as LGBTQ</td></tr>
+        <tr><td>Impact of community support</td><td>Strongest protective factor cited by researchers</td></tr>
+      </table>
+      <h4>Election Statistics</h4>
+      <table class="modal-table">
+        <tr><th>Metric</th><th>Data</th></tr>
+        <tr><td>McBride's November 2024 vote share</td><td><strong>58%</strong></td></tr>
+        <tr><td>Date sworn into Congress</td><td>January 3, 2025</td></tr>
+        <tr><td>Historic significance</td><td>First openly transgender member of U.S. Congress</td></tr>
+      </table>
+      <h4>Board Meeting Statistics</h4>
+      <table class="modal-table">
+        <tr><th>Metric</th><th>Data</th></tr>
+        <tr><td>Total public speakers</td><td>13</td></tr>
+        <tr><td>Speakers in support of post</td><td>12 (92.3%)</td></tr>
+        <tr><td>Speakers opposed</td><td>1 (7.7%)</td></tr>
+      </table>
+      <h4>Infrastructure Statistics</h4>
+      <table class="modal-table">
+        <tr><th>Item</th><th>Cost/Age</th></tr>
+        <tr><td>HLS Phase 1 repairs</td><td>~$11.3 million</td></tr>
+        <tr><td>HLS Phase 2 repairs</td><td>~$6.3 million</td></tr>
+        <tr><td>Galvanized pipes (JB Nelson)</td><td>70 years old; near-failure Jan 2026</td></tr>
+        <tr><td>Ventilation systems (Routolo)</td><td>Original units from 1992 building opening</td></tr>
+        <tr><td>Failed referendum value</td><td>$140 million (failed twice)</td></tr>
+        <tr><td>Batavia population</td><td>~27,000</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Speaker Modals -->
+<div class="modal-overlay" id="modal-speaker-mueller" onclick="if(event.target===this)closeModal('modal-speaker-mueller')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Paula Mueller — Speaker #1</h3><button class="modal-close" onclick="closeModal('modal-speaker-mueller')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> Batavia parent</p>
+      <h4>Key Testimony</h4>
+      <p>"I wanted to thank you for the post of Sarah McBride this past March. Sarah McBride is a powerful woman that has made strides in defending LGBTQ rights and the first transgender American elected to high public office. She's a leader in an ongoing fight for human rights and it was great comfort to see the school district applaud her work. I applaud you for that post and I hope to see more welcoming posts throughout the month."</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-delmaso" onclick="if(event.target===this)closeModal('modal-speaker-delmaso')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Heather Delmaso — Speaker #2</h3><button class="modal-close" onclick="closeModal('modal-speaker-delmaso')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> Batavia parent — one child is a BHS graduate, one is a current freshman</p>
+      <h4>Key Testimony (The Statistical Case)</h4>
+      <p>"Research shows that roughly <strong>9 to 10% of teenagers identify as LGBTQ</strong>. That means in any school, on any team, or in any club, there are students who fall into that group. We know something else that matters: those youth experience significantly higher rates of depression and suicide attempts. Research consistently shows that one of the strongest protective factors is feeling accepted and safe in the communities around them."</p>
+      <br>
+      <p>"They are not political talking points. They are real kids in this district. They participate in sports, perform in band and theater, belong to clubs and honor societies, and sit in classrooms every day with all the other students who are their friends and classmates."</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-hatfield" onclick="if(event.target===this)closeModal('modal-speaker-hatfield')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Ryan Hatfield — Speaker #4</h3><button class="modal-close" onclick="closeModal('modal-speaker-hatfield')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> Batavia resident since 2019</p>
+      <h4>Key Testimony</h4>
+      <p>"Trans women are women and the month of March should celebrate women from a wide range of backgrounds and identities. Sarah won the general election in November 2024 with <strong>58% of the vote</strong> and became the first openly transgender member of the US Congress on January 3rd of 2025 — a historic event and one that helps those in the trans and broader LGBTQIA+ community feel seen and represented."</p>
+      <br>
+      <p>"The post and the inclusion of Sarah doesn't take away from but rather enhances the broader picture of the contributions and achievement of all women. It showcases the diversity of women and helps paint a complete picture. Recognizing another's right to exist, treating them with dignity — recognizing standing up in the face of injustice — I trust you not to do that."</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-kaya" onclick="if(event.target===this)closeModal('modal-speaker-kaya')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Kaya (Kan Clark) — Speaker #5</h3><button class="modal-close" onclick="closeModal('modal-speaker-kaya')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> Young professional, LGBTQ resident, moved to Batavia 4.5 years ago</p>
+      <h4>Key Testimony</h4>
+      <p>"I am a lesbian and I was terrified that moving to a smaller town would be scary and there would be no LGBTQ people and that I would have to drive an hour and a half to Chicago to see gay people. Luckily that was not true. People in this town put up signs and flags and stickers."</p>
+      <br>
+      <p>"I saw that post and I was like, 'Wow that's so cool.' And then I saw the comments and I saw the post get deleted. I hope that the board remembers that when you make posts like that, you are putting a sticker on the school or putting up a flag that says, 'Hey, we care about you and you don't have to drive an hour and a half away to find people who love you and care about you and support you.' I think that's what that post was. I think it really sucks that people poo-pooed on it. Students in Batavia deserve that."</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-kendall" onclick="if(event.target===this)closeModal('modal-speaker-kendall')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Chrissy White Kendall — Speaker #6</h3><button class="modal-close" onclick="closeModal('modal-speaker-kendall')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> Batavia resident since 2021</p>
+      <h4>Key Testimony</h4>
+      <p>"I also really love this town. I'm borderline obsessed with it. When I moved here in 2021, I quickly realized that Batavia holds many different perspectives. I saw rainbow flags outside one coffee shop and then just around the corner 'back the blue' signs on the other coffee shop. Batavia is a place with many different perspectives."</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-den" onclick="if(event.target===this)closeModal('modal-speaker-den')">
+  <div class="modal-box">
+    <div class="modal-header" style="background: var(--red);"><h3>Richard Den — The Lone Opponent</h3><button class="modal-close" onclick="closeModal('modal-speaker-den')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Opposed</p>
+      <p><strong>Role:</strong> Batavia resident</p>
+      <div class="alert-box danger"><div class="alert-icon">⚡</div><p>Richard Den was the only one of 13 speakers to oppose the post. His testimony was combative and included demands for firings and resignations.</p></div>
+      <h4>Key Testimony</h4>
+      <p>"First I'm requesting the immediate firing of Miss Dipman here, the director of communications at BPS, for spreading lies and propaganda. After that I'm going to ask all of you at the BPS101 school board to immediately resign for allowing lies and propaganda online."</p>
+      <br>
+      <p>"I'm wondering how in a town of 27,000 people you can't find one female to celebrate. That's pretty sad. How do you believe this impacts the self-esteem of real girls within this school district? In a single post you brought disgrace and embarrassment to our entire school district, our community, the state, and throughout the entire country."</p>
+      <br>
+      <p>Den also argued the post contained factual/grammatical errors and referred to McBride using male pronouns, saying "And yes, Tim is a man. So that's biology." He attempted to ask the board directly: "Can we get on the record whether you support teaching children that men can become females?" The Board President replied that this was not the format for direct questions.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-sperry" onclick="if(event.target===this)closeModal('modal-speaker-sperry')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Matt Sperry — Speaker #8</h3><button class="modal-close" onclick="closeModal('modal-speaker-sperry')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> Attorney, lifelong Batavia resident, BHS Class of 1999, current BPS parent</p>
+      <h4>Key Testimony</h4>
+      <p>"I come here to thank the board and to speak in support of the post related to Representative McBride. In relation to my own children, I view what's been going on with the posts and the current political environment as a teaching moment for them — explaining to my kids tonight... [the importance of inclusive representation]."</p>
+      <br>
+      <p>As an attorney, Sperry's framing of the issue as a "teaching moment" was notable — positioning the district's action not as a controversial political statement but as an exercise in civic education.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-hem" onclick="if(event.target===this)closeModal('modal-speaker-hem')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Missy (Melissa) Hem — Speaker #9</h3><button class="modal-close" onclick="closeModal('modal-speaker-hem')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> BPS parent</p>
+      <h4>Key Testimony</h4>
+      <p>"I'm here to express my support for the trans kids in our school district and other trans folks in the community. I was really pleasantly surprised to see the post on BPS social media honoring the accomplishments of Congresswoman Sarah McBride. I did not expect to learn about the [controversy] that followed."</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-ford" onclick="if(event.target===this)closeModal('modal-speaker-ford')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Sunny Ford — Speaker #10</h3><button class="modal-close" onclick="closeModal('modal-speaker-ford')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> Geneva resident (nearly lifelong)</p>
+      <h4>Key Testimony</h4>
+      <p>Ford addressed the post through the lens of the lived experience of transgender teenagers, noting: <em>"It is hard to be a transgender teenager."</em> She emphasized the real-world impact that visibility and institutional affirmation have on young people's wellbeing, linking the district's post directly to the mental health research cited by other speakers. She also cited NIH and Trevor Project research on the 40% suicide risk reduction.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-theobald" onclick="if(event.target===this)closeModal('modal-speaker-theobald')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Denise Theobald — Speaker #11</h3><button class="modal-close" onclick="closeModal('modal-speaker-theobald')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> Geneva resident</p>
+      <h4>Key Testimony</h4>
+      <p>"I want to begin by thanking the board for recognizing women's history month by highlighting the contributions of Sarah McBride. Acknowledging leaders who have broken barriers and expanded opportunities really matters. It sends a message to our students that history is still being written, and that courage, authenticity, and purpose can lead to extraordinary things."</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-eckleston" onclick="if(event.target===this)closeModal('modal-speaker-eckleston')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Elizabeth Eckleston — Final Speaker</h3><button class="modal-close" onclick="closeModal('modal-speaker-eckleston')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> Batavia resident, mother of a Grace McWain ILP student</p>
+      <h4>Key Testimony</h4>
+      <p>"I am incredibly grateful that the post was made. Our lives are vastly improved when we celebrate and recognize the contributions of our marginalized communities." As the final speaker, her remarks closed the public comment period on a note of affirmation.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-speaker-aragon" onclick="if(event.target===this)closeModal('modal-speaker-aragon')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Wilma Van Aragon — Speaker #3</h3><button class="modal-close" onclick="closeModal('modal-speaker-aragon')">×</button></div>
+    <div class="modal-body">
+      <p><strong>Position:</strong> Support</p>
+      <p><strong>Role:</strong> Batavia resident for 14 years; retired educator (her husband was a middle school principal) and certified school nurse/department chair</p>
+      <h4>Key Testimony</h4>
+      <p>"From attacks on identity to attempts to roll back equality, it's important to stand together and let everyone feel safe and loved. Batavia has always felt like a close community and this willingness to stand together in support of LGBTQ people... I just want to thank you again for that post and for your support."</p>
+      <p style="margin-top: 12px;">Van Aragon's background as a retired school nurse and educator gave added weight to her testimony about the health and institutional dimensions of the controversy.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Media Modals -->
+<div class="modal-overlay" id="modal-media-conservative" onclick="if(event.target===this)closeModal('modal-media-conservative')">
+  <div class="modal-box">
+    <div class="modal-header" style="background: var(--red);"><h3>Conservative Media Coverage: Deep Dive</h3><button class="modal-close" onclick="closeModal('modal-media-conservative')">×</button></div>
+    <div class="modal-body">
+      <h4>Breakthrough Ideas</h4>
+      <p>Published the most exhaustive critique. Their framework moved beyond political disagreement into what analysts call "ontological dispute" — using terms like "Gnostic superstition" to describe gender identity and "a gendered ghost inside the wrong machine" to delegitimize the concept of gender dysphoria.</p>
+      <h4>Key Arguments Made</h4>
+      <ul>
+        <li>The post endorsed "trans superstition" that "denies the meaning of physical embodiment"</li>
+        <li>BPS101 potentially jeopardized federal funding under Trump's Executive Order "Ending Radical Indoctrination in K-12 Schooling"</li>
+        <li>The district used "publicly subsidized time and resources" to promote ideas the EO seeks to defund</li>
+        <li>The post violated the district's own neutrality guidelines ("glowing" and "jubilant" rather than neutral)</li>
+        <li>Women like Amy Coney Barrett, Condoleezza Rice, and Clara Barton were ignored in favor of McBride</li>
+      </ul>
+      <h4>Jeanne Ives (Former IL Lawmaker)</h4>
+      <p>Posted on X calling the tribute an <strong>"embarrassing and Woke tribute"</strong> — serving as the initial spark for broader media mobilization.</p>
+      <h4>Impact</h4>
+      <p>Screenshots were taken before deletion. The story reached Tucker Carlson's audience, the Daily Caller, and national conservative platforms — making the Batavia post permanently part of a national culture war narrative regardless of the district's deletion.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-media-local" onclick="if(event.target===this)closeModal('modal-media-local')">
+  <div class="modal-box">
+    <div class="modal-header" style="background: var(--green);"><h3>Local Media Coverage: Deep Dive</h3><button class="modal-close" onclick="closeModal('modal-media-local')">×</button></div>
+    <div class="modal-body">
+      <h4>Shaw Local / Kane County Chronicle</h4>
+      <p>Journalist Brenda Schory provided the most grounded account of the controversy, focusing on the striking disconnect between the online response and the in-person community. Her coverage documented:</p>
+      <ul>
+        <li>The 12-to-1 support ratio at the March 16 board meeting</li>
+        <li>Emotional testimony from parents about LGBTQ+ students</li>
+        <li>The mental health statistics cited by supporters</li>
+        <li>Ryan Hatfield's argument that the inclusion "enhances — but rather enhances — the broader picture"</li>
+        <li>Board Member Katy Swiecki's statement as the definitive institutional response</li>
+      </ul>
+      <h4>Framing</h4>
+      <p>Local media framed the story around "community polarization and the tension between online hate and local support" — a notably different frame from the national outlets' focus on ideology and federal funding. This reporting provided a necessary corrective to the national narrative.</p>
+      <div class="alert-box success" style="margin-top: 14px;"><div class="alert-icon">✅</div><p>The local coverage is the most accurate representation of the Batavia community's actual response to the controversy.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-media-blog" onclick="if(event.target===this)closeModal('modal-media-blog')">
+  <div class="modal-box">
+    <div class="modal-header"><h3>Batavia 5th Ward Blog: Deep Dive</h3><button class="modal-close" onclick="closeModal('modal-media-blog')">×</button></div>
+    <div class="modal-body">
+      <h4>Coverage Scope</h4>
+      <p>The Batavia 5th Ward Blog provided the most comprehensive single-source account of the March 16 board meeting, covering both the social media controversy and the district's broader operational agenda in the same post. This juxtaposition was analytically significant — placing the culture war alongside failing infrastructure, boundary adjustments, and new communication initiatives.</p>
+      <h4>Key Documented Items</h4>
+      <ul>
+        <li>The HLS bond infrastructure presentations ($11.3M + $6.3M)</li>
+        <li>Failing galvanized pipes at JB Nelson (70 years old)</li>
+        <li>The new Student Board Member Program</li>
+        <li>The District Dispatch newsletter launch</li>
+        <li>The "Kids These Days" podcast</li>
+        <li>All 13 public comment testimonies</li>
+      </ul>
+      <h4>Analytical Value</h4>
+      <p>The blog's coverage serves as the primary source for the "distraction narrative" — noting that while the community debated a Facebook post, the district's actual physical plant was in crisis. The juxtaposition suggests the board's primary focus remained on the logistical survival of the district, not on culture war management.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-media-global" onclick="if(event.target===this)closeModal('modal-media-global')">
+  <div class="modal-box">
+    <div class="modal-header" style="background: #5b21b6;"><h3>Global Context: IWD Website Controversy</h3><button class="modal-close" onclick="closeModal('modal-media-global')">×</button></div>
+    <div class="modal-body">
+      <h4>The Guardian Report (March 15, 2026)</h4>
+      <p>The Guardian reported on a significant parallel controversy: the website <strong>internationalwomensday.com</strong>, which major UK brands including Sainsbury's and Barclays had mistakenly treated as an official UN-linked site, was condemned by campaigners for "exploiting a social movement for financial gain."</p>
+      <h4>The UN's Position</h4>
+      <p>The United Nations formally distanced itself from the site, which campaigners argue is "watering down" International Women's Day into "almost meaningless marketing" where commercial themes don't align with a "genuine desire to advance women's rights."</p>
+      <h4>Relevance to Batavia</h4>
+      <p>This global context matters because when BPS101 chose McBride for Women's History Month, it was operating in an environment where the very definition and ownership of "women's history" was actively contested worldwide — not just locally. The critics' argument that the district chose a "man who pretends to be a woman" to represent women's history was framed by some outlets as a symptom of this broader "watering down" phenomenon.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p><strong>BPS101 Social Media Controversy — Research Report</strong></p>
+    <p style="margin-top: 8px;">Based on: Shaw Local / Kane County Chronicle reporting (March 22, 2026) · Breakthrough Ideas (March 12, 2026) · Batavia 5th Ward Blog (March 17, 2026) · BPS101 Board Meeting Transcript (March 16, 2026) · Batavia Community Facebook Group Comments · The Guardian (March 15, 2026)</p>
+    <p style="margin-top: 12px; opacity: 0.5;">Report compiled March 22, 2026 · All statistics sourced from primary documents</p>
+  </div>
+</footer>
+
+<script>
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(m => {
+        m.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    }
+  });
+</script>
+</body>
+</html>
